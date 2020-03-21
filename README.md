@@ -30,6 +30,7 @@ http://localhost:8887
 [Bootstrap](https://v3.bootcss.com/getting-started/)    
 [Github OAuth](https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/)    
 [Spring](https://docs.spring.io/spring-boot/docs/2.0.0.RC1/reference/htmlsingle/#boot-features-embedded-database-support)    
+[Spring整合mybatis](https://mybatis.org/spring-boot-starter/mybatis-spring-boot-test-autoconfigure/index.html)    
 [菜鸟教程](https://www.runoob.com/mysql/mysql-insert-query.html)    
 [Thymeleaf](https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#setting-attribute-values)    
 [Spring Dev Tool](https://docs.spring.io/spring-boot/docs/2.0.0.RC1/reference/htmlsingle/#using-boot-devtools)  
