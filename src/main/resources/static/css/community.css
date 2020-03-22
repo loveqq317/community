@@ -1,6 +1,9 @@
 html,body{
     background-color:#eeeeee;
 }
+body{
+    /*background: url('/img/bg.jpg') repeat;*/
+}
 .main{
     margin:30px;
     background-color:#ffffff;
@@ -8,4 +11,13 @@ html,body{
 .btn-publish{
     float:right;
     margin-bottom:15px;
+}
+.media-object{
+    width:40px;
+    height: 40px;
+}
+.comment-text{
+    font-size: 12px;
+    font-weight: normal;
+    color: #999;
 }
