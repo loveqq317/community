@@ -31,21 +31,8 @@ public class PageDTO {
      * @Param [totalCount:总页数, page：当前页, size：每页多少条数据]
      * @return void
      **/
-    public void setPagination(Integer totalCount,Integer page,Integer size){
-
-
-        //Integer totalPage=0;//总页数
-        if (totalCount % size == 0){
-            totalPage=totalCount / size;
-        }else{
-            totalPage=totalCount / size +1;
-        }
-        if (page < 1){
-            page=1;
-        }
-        if (page > totalPage){
-            page=totalPage;
-        }
+    public void setPagination(Integer totalPage,Integer page){
+        this.totalPage=totalPage;
         this.page=page;
         //是否展示跳转到上一页按钮 <  如果选第一页，就不显示
         if (page == 1){
@@ -69,6 +56,8 @@ public class PageDTO {
                 pages.add(page+i);//往后面加
             }
         }
+
+
         //是否展示第一页
         if(pages.contains(1)){
             showFirstPage=false;

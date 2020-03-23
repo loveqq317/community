@@ -56,15 +56,7 @@ public class PublishController {
             return "publish";
         }
         //判断cookie里的用户信息
-        User user = null;
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("token")) {
-                String token = cookie.getValue();
-                user = userMapper.findByUser(token);
-                break;
-            }
-        }
+        User user= (User) request.getSession().getAttribute("user");
         if (user == null) {
             model.addAttribute("error", "用户未登录");
         } else {

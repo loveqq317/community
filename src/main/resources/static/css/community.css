@@ -4,8 +4,12 @@ html,body{
 body{
     /*background: url('/img/bg.jpg') repeat;*/
 }
+a {
+    cursor: pointer;
+    color: #155faa;
+}
 .main{
-    margin:30px;
+    max-width: 1300px !important;
     background-color:#ffffff;
 }
 .btn-publish{
@@ -20,4 +24,13 @@ body{
     font-size: 12px;
     font-weight: normal;
     color: #999;
+}
+.titleH4{
+    margin: 0 0 3px;
+    padding-right: 20px;
+    font-size: 14px;
+    word-wrap: break-word;
+}
+.profile .section{
+    margin-top:27px;
 }
