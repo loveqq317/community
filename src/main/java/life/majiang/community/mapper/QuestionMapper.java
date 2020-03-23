@@ -11,7 +11,9 @@ import java.util.List;
 public interface QuestionMapper {
     @Insert("insert into question (title,description,gmt_create,gmt_modified,creator,comment_count,view_count,like_count,tag) values (#{title},#{description},#{gmtCreate},#{gmtModified},#{creator},#{commentCount},#{viewCount},#{likeCount},#{tag})")
     public void insert(Question question);
-    @Select("select * from question")
-    public List<Question> list();
+    @Select("select * from question limit #{offset},#{size}")
+    public List<Question> list(Integer offset, Integer size);
+    @Select("select count(1) from question")
+    Integer count();
 
 }
