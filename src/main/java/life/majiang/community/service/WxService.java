@@ -1,6 +1,8 @@
 package life.majiang.community.service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baidu.aip.ocr.AipOcr;
 import com.thoughtworks.xstream.XStream;
 import life.majiang.community.mapper.TokenMapper;
 import life.majiang.community.model.Token;
@@ -10,14 +12,22 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.stereotype.Service;
 
+import javax.net.ssl.HttpsURLConnection;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+
 
 /**
  * @ClassName WxService
@@ -36,10 +46,20 @@ public class WxService {
     private String appid;
     @Value("${wx.secret}")
     private String secret;
+    @Value("${wx.api.media.upload}")
+    private String mediaUploadUrl;
     @Autowired
     private WxUtil wxUtil;
     @Autowired
     private TokenMapper tokenMapper;
+
+    //设置APPID/AK/SK
+    @Value("${baidu.app.id}")
+    private  String appId;
+    @Value("${baidu.api.key}")
+    private  String apiKey;
+    @Value("${baidu.secret.key}")
+    private  String secretKey;
     /**
      * @Author juyahong
      * @Description 获取token
@@ -52,7 +72,7 @@ public class WxService {
         String url=tokenUrl.replace("APPID",appid).replace("APPSECRET",secret);
         String tokenStr=wxUtil.get(url);
         System.out.println("tokenStr"+tokenStr);
-        JSONObject jsonObject=JSONObject.parseObject(tokenStr);
+        JSONObject jsonObject= JSONObject.parseObject(tokenStr);
         String token=jsonObject.getString("access_token");
         Long expiresIn=jsonObject.getLong("expires_in");
         Token wxToken=new Token(token,expiresIn);
@@ -142,6 +162,7 @@ public class WxService {
                 msgObj=dealTextMessage(requestMap);
                 break;
             case "image":
+                msgObj=dealImageMessage(requestMap);
                 break;
             case "voice":
                 break;
@@ -151,12 +172,108 @@ public class WxService {
                 break;
             case "location":
                 break;
+            case "event":
+                msgObj=dealEvent(requestMap);
+                break;
+            default:
+                break;
         }
         if (null != msgObj){
             return beanToXml(msgObj);
         }
         return null;
     }
+    /**
+     * @Author juyahong
+     * @Description //进行图片识别
+     * @Date 2:26 下午 2020/3/25
+     * @Param [requestMap]
+     * @return life.majiang.community.wx.BaseMessage
+     **/
+    private BaseMessage dealImageMessage(Map<String, String> requestMap) {
+//      初始化一个AipOcr
+        AipOcr client = new AipOcr(appId, apiKey, secretKey);
+
+        // 可选：设置网络连接参数
+        client.setConnectionTimeoutInMillis(2000);
+        client.setSocketTimeoutInMillis(60000);
+
+        // 可选：设置代理服务器地址, http和socket二选一，或者均不设置
+        //client.setHttpProxy("proxy_host", proxy_port);  // 设置http代理
+        // client.setSocketProxy("proxy_host", proxy_port);  // 设置socket代理
+
+        // 可选：设置log4j日志输出格式，若不设置，则使用默认配置
+        // 也可以直接通过jvm启动参数设置此环境变量
+        //System.setProperty("aip.log4j.conf", "path/to/your/log4j.properties");
+       // 传入可选参数调用接口
+        HashMap<String, String> options = new HashMap<String, String>();
+        options.put("recognize_granularity", "big");
+        options.put("language_type", "CHN_ENG");
+        options.put("detect_direction", "true");
+        options.put("detect_language", "true");
+        options.put("vertexes_location", "true");
+        options.put("probability", "true");
+        // 调用接口
+        String path = requestMap.get("PicUrl");
+        //option可以传 new HashMap<>
+        org.json.JSONObject res =  client.generalUrl(path, options);
+
+        JSONArray jsonArray=res.getJSONArray("words_result");
+        StringBuilder stringBuilder=new StringBuilder();
+        for(int i=0;i<jsonArray.length();i++){
+            org.json.JSONObject jsonObject=jsonArray.getJSONObject(i);
+            stringBuilder.append(jsonObject.get("words"));
+        }
+
+        return new TextMessageRequest(requestMap,stringBuilder.toString());
+    }
+
+    /**
+     * @Author juyahong
+     * @Description //事件推送
+     * @Date 2:08 下午 2020/3/25
+     * @Param [requestMap]
+     * @return life.majiang.community.wx.BaseMessage
+     **/
+    private BaseMessage dealEvent(Map<String, String> requestMap) {
+        String event=requestMap.get("Event");
+        switch (event){
+            case "CLICK":
+                return dealClick(requestMap);
+            case "VIEW":
+                return dealView(requestMap);
+
+            default:
+                break;
+        }
+        return null;
+    }
+
+    private BaseMessage dealView(Map<String, String> requestMap) {
+        return null;
+    }
+
+    /**
+     * @Author juyahong
+     * @Description //专门用来出来Click菜单
+     * @Date 2:16 下午 2020/3/25
+     * @Param [requestMap]
+     * @return life.majiang.community.wx.BaseMessage
+     **/
+    private BaseMessage dealClick(Map<String, String> requestMap) {
+        String eventKey=requestMap.get("EventKey");
+        switch (eventKey){
+            case "1":
+                //处理点击第一个一级菜单
+                return new TextMessageRequest(requestMap,"你点击了第一个一级菜单");
+            case "3222":
+                break;
+            default:
+                break;
+        }
+        return  null;
+    }
+
     /**
      * @Author juyahong
      * @Description //对象转xml
@@ -198,5 +315,66 @@ public class WxService {
         }
         TextMessageRequest textMessageRequest=new TextMessageRequest(requestMap,"你好呀");
         return textMessageRequest;
+    }
+    /**
+     * @Author juyahong
+     * @Description //上传临时素材
+     * @Date 4:49 下午 2020/3/25
+     * @Param [path, type]
+     * @return java.lang.String
+     **/
+    public String upload(String path,String type){
+        File file=new File(path);
+        String url=mediaUploadUrl.replace("ACCESS_TOKEN",this.getAccessToken()).replace("TYPE",type);
+
+        try {
+            URL urlObj=new URL(url);
+            //强转为安全连接
+            HttpsURLConnection connection= (HttpsURLConnection) urlObj.openConnection();
+            //设置连接信息
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            connection.setUseCaches(false);
+            //设置请求头信息
+            connection.setRequestProperty("Connection","Keep-Alive");
+            connection.setRequestProperty("Charset","utf8");
+            //数据的边界
+            String boundary="-----" + System.currentTimeMillis();
+            connection.setRequestProperty("Content-Type","multipart/form-data;boundary="+boundary);
+            OutputStream out = connection.getOutputStream();
+            InputStream inputStream = new FileInputStream(file);
+            //第一部分：头部信息
+            //准备头部信息
+            StringBuilder sb=new StringBuilder();
+            sb.append("--");
+            sb.append(boundary);
+            sb.append("\r\n");
+            sb.append("Content-Dispositon:form-data;name=\"media\";filename=\"" + file.getName()+"\"\r\n");
+            sb.append("Content-type:application/octet-stream\r\n\r\n");
+            out.write(sb.toString().getBytes());
+
+            //第二部分：文件内容
+            byte[] b=new byte[1024];
+            int len;
+
+            while ((len=inputStream.read(b))!= -1) {
+               out.write(b,0,len);
+            }
+            //第三部分：尾部信息
+            String foot="\r\n--"+boundary+"--\r\n";
+            out.write(foot.getBytes());
+            out.flush();
+            out.close();
+            //读取数据
+            InputStream is2=connection.getInputStream();
+            StringBuilder resp=new StringBuilder();
+            while((len=is2.read(b))!=-1){
+                resp.append(new String(b,0,len));
+            }
+            return resp.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

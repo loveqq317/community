@@ -1,10 +1,12 @@
 package life.majiang.community.util;
 
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -45,4 +47,40 @@ public class WxUtil {
         }
         return null;
     }
+    /**
+     * @Author juyahong
+     * @Description //向指定地址发送post请求
+     * @Date 1:49 下午 2020/3/25
+     * @Param [url, data]
+     * @return java.lang.String
+     **/
+    public String post(String url,String data){
+        try {
+            URL urlObj=new URL(url);
+            //开连接
+            URLConnection connection=urlObj.openConnection();
+            //设置为可发送数据状态
+            connection.setDoOutput(true);
+            //获取输出流
+            OutputStream os=connection.getOutputStream();
+            //写出数据
+            os.write(data.getBytes());
+            os.close();
+            //获取输入流
+            InputStream inputStream=connection.getInputStream();
+            byte[] bytes=new byte[1024];
+            int len;
+            StringBuilder stringBuilder=new StringBuilder();
+            while ((len=inputStream.read(bytes))!= -1){
+                stringBuilder.append(new String(bytes,0,len));
+            }
+            return stringBuilder.toString();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

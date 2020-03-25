@@ -1,4 +1,4 @@
-package life.majiang.community.model;
+package life.majiang.community.wx;
 
 import lombok.Data;
 import org.springframework.scheduling.support.SimpleTriggerContext;

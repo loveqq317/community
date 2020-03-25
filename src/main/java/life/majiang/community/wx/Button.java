@@ -1,8 +1,7 @@
-package life.majiang.community.model;
+package life.majiang.community.wx;
 
 import lombok.Data;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
