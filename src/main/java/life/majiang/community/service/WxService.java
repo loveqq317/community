@@ -1,6 +1,5 @@
 package life.majiang.community.service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baidu.aip.ocr.AipOcr;
 import com.thoughtworks.xstream.XStream;
@@ -15,7 +14,6 @@ import org.dom4j.io.SAXReader;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.stereotype.Service;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -43,11 +41,13 @@ public class WxService {
     @Value("${wx.get.token.url}")
     private String tokenUrl;
     @Value("${wx.appid}")
-    private String appid;
+    private String wxAppId;
     @Value("${wx.secret}")
     private String secret;
     @Value("${wx.api.media.upload}")
     private String mediaUploadUrl;
+    @Value("${wx.api.oauth2}")
+    private String autorUrl;
     @Autowired
     private WxUtil wxUtil;
     @Autowired
@@ -55,7 +55,7 @@ public class WxService {
 
     //设置APPID/AK/SK
     @Value("${baidu.app.id}")
-    private  String appId;
+    private  String baiduAppId;
     @Value("${baidu.api.key}")
     private  String apiKey;
     @Value("${baidu.secret.key}")
@@ -69,7 +69,7 @@ public class WxService {
      **/
     private  Token  getToken(){
         System.out.println(tokenUrl);
-        String url=tokenUrl.replace("APPID",appid).replace("APPSECRET",secret);
+        String url=tokenUrl.replace("APPID", wxAppId).replace("APPSECRET",secret);
         String tokenStr=wxUtil.get(url);
         System.out.println("tokenStr"+tokenStr);
         JSONObject jsonObject= JSONObject.parseObject(tokenStr);
@@ -192,7 +192,7 @@ public class WxService {
      **/
     private BaseMessage dealImageMessage(Map<String, String> requestMap) {
 //      初始化一个AipOcr
-        AipOcr client = new AipOcr(appId, apiKey, secretKey);
+        AipOcr client = new AipOcr(baiduAppId, apiKey, secretKey);
 
         // 可选：设置网络连接参数
         client.setConnectionTimeoutInMillis(2000);
@@ -312,6 +312,11 @@ public class WxService {
             articles.add(news);
             NewsMessageRequest newsMessageRequest=new NewsMessageRequest(requestMap,1,articles);
             return  newsMessageRequest;
+        }else if(msg.equals("登录")){
+            String url=autorUrl.replace("APPID", wxAppId).replace("REDIRECT_URI","http://jyhwx.free.idcfengye.com")
+                    .replace("SCOPE","snsapi_userinfo");
+            TextMessageRequest textMessageRequest=new TextMessageRequest(requestMap,"<a href=\""+url+"\">点击这里登录</a>");
+            return textMessageRequest;
         }
         TextMessageRequest textMessageRequest=new TextMessageRequest(requestMap,"你好呀");
         return textMessageRequest;
