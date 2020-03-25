@@ -1,0 +1,1 @@
+alter table TOKEN alter column ACCESS_TOKEN VARCHAR(512);

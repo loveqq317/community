@@ -32,6 +32,7 @@ public class SessionInterceptor implements HandlerInterceptor {
                     String token=cookie.getValue();
                     User user=userMapper.findByUser(token);
                     if (user != null ){
+                        System.out.println("设置session");
                         request.getSession().setAttribute("user",user);
                     }
                     break;
