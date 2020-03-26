@@ -3,6 +3,8 @@ package life.majiang.community.service;
 import com.sun.tools.javac.comp.Annotate;
 import life.majiang.community.dto.PageDTO;
 import life.majiang.community.dto.QuestionDTO;
+import life.majiang.community.exception.CustomizeErrorCode;import life.majiang.community.exception.CustomizeException;
+import life.majiang.community.mapper.QuestionExpMapper;
 import life.majiang.community.mapper.QuestionMapper;
 import life.majiang.community.mapper.UserMapper;
 import life.majiang.community.model.Question;
@@ -30,6 +32,8 @@ public class QuestionService {
     private UserMapper userMapper;
     @Autowired
     private QuestionMapper questionMapper;
+    @Autowired
+    private QuestionExpMapper questionExpMapper;
     public PageDTO list(Integer page, Integer size){
         PageDTO pageDTO=new PageDTO();
         Integer totalPage;
@@ -99,6 +103,9 @@ public class QuestionService {
 
     public QuestionDTO getById(Integer id) {
        Question question= questionMapper.selectByPrimaryKey(id);
+       if (question == null){
+           throw  new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+       }
        User user=userMapper.selectByPrimaryKey(question.getCreator());
        QuestionDTO questionDTO=new QuestionDTO();
        questionDTO.setUser(user);
@@ -121,9 +128,19 @@ public class QuestionService {
             updateQuestion.setTag(question.getTag());
             QuestionExample example=new QuestionExample();
             example.createCriteria().andIdEqualTo(question.getId());
-            questionMapper.updateByExampleSelective(updateQuestion,example);
+            int updatedState=questionMapper.updateByExampleSelective(updateQuestion,example);
+            if (updatedState != 1){
+                throw  new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+            }
         }
 
 
+    }
+
+    public void incView(Integer id) {
+        Question record = new Question();
+        record.setViewCount(1);
+        record.setId(id);
+        questionExpMapper.incView(record);
     }
 }
