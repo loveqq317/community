@@ -29,7 +29,7 @@
             <property name="enableSubPackages" value="true" />
         </sqlMapGenerator>
 <!-- dao 包 -->
-        <javaClientGenerator type="XMLMAPPER" targetPackage="life.majiang.community.model.mapper"  targetProject="src/main/java">
+        <javaClientGenerator type="XMLMAPPER" targetPackage="life.majiang.community.mapper"  targetProject="src/main/java">
             <property name="enableSubPackages" value="true" />
         </javaClientGenerator>
 
