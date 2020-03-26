@@ -27,7 +27,7 @@
                 </div>
                 <div class="media-body">
                     <h4 class="media-heading titleH4">
-                        <a th:text="${question.title}"></a>
+                        <a th:text="${question.title}" th:href="@{'/question/'+${question.id}}">></a>
                     </h4>
                     <p>
                         <span class="comment-text"> <span th:text="${question.commentCount}"></span> 个评论 • <span th:text="${question.viewCount}"></span> 次浏览 • <span th:text="${#dates.format(question.gmtCreate, 'yyyy-MM-dd HH:mm')}"></span></span>
