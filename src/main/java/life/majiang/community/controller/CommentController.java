@@ -1,11 +1,8 @@
 package life.majiang.community.controller;
 
-import com.sun.org.apache.bcel.internal.generic.ARETURN;
-import com.sun.tools.javac.comp.Annotate;
 import life.majiang.community.dto.CommentDTO;
 import life.majiang.community.dto.ResultDTO;
 import life.majiang.community.exception.CustomizeErrorCode;
-import life.majiang.community.mapper.CommentMapper;
 import life.majiang.community.model.Comment;
 import life.majiang.community.model.User;
 import life.majiang.community.service.CommentService;
@@ -17,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @ClassName CommentController
