@@ -1,11 +1,15 @@
 package life.majiang.community.service;
 
+import com.sun.tools.javac.comp.Annotate;
 import life.majiang.community.dto.PageDTO;
 import life.majiang.community.dto.QuestionDTO;
 import life.majiang.community.mapper.QuestionMapper;
 import life.majiang.community.mapper.UserMapper;
 import life.majiang.community.model.Question;
+import life.majiang.community.model.QuestionExample;
 import life.majiang.community.model.User;
+import life.majiang.community.model.UserExample;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +33,7 @@ public class QuestionService {
     public PageDTO list(Integer page, Integer size){
         PageDTO pageDTO=new PageDTO();
         Integer totalPage;
-        Integer totalCount=questionMapper.count();//数据总条数
+        Integer totalCount=(int)questionMapper.countByExample(new QuestionExample());//数据总条数
         if (totalCount % size == 0){
             totalPage=totalCount / size;
         }else{
@@ -45,10 +49,10 @@ public class QuestionService {
 
         //size * (page-1)
         Integer offset=size*(page-1);
-        List<Question> questions=questionMapper.list(offset,size);
+        List<Question> questions=questionMapper.selectByExampleWithRowbounds(new QuestionExample(),new RowBounds(offset,size));
         List<QuestionDTO> list = new ArrayList<>();
         for(Question question:questions){
-            User user=userMapper.findById(question.getCreator());
+            User user=userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDTO questionDTO=new QuestionDTO();
             BeanUtils.copyProperties(question,questionDTO);
             questionDTO.setUser(user);
@@ -61,7 +65,9 @@ public class QuestionService {
     public PageDTO list(Integer id,Integer page,Integer size){
         PageDTO pageDTO=new PageDTO();
         Integer totalPage;
-        Integer totalCount=questionMapper.countByUserId(id);//数据总条数
+        QuestionExample example=new QuestionExample();
+        example.createCriteria().andCreatorEqualTo(id);
+        Integer totalCount=(int)questionMapper.countByExample(example);//数据总条数
         if (totalCount % size == 0){
             totalPage=totalCount / size;
         }else{
@@ -77,10 +83,10 @@ public class QuestionService {
 
         //size * (page-1)
         Integer offset=size*(page-1);
-        List<Question> questions=questionMapper.listByUserId(id,offset,size);
+        List<Question> questions=questionMapper.selectByExampleWithRowbounds(example,new RowBounds(offset,size));
         List<QuestionDTO> list = new ArrayList<>();
         for(Question question:questions){
-            User user=userMapper.findById(question.getCreator());
+            User user=userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDTO questionDTO=new QuestionDTO();
             BeanUtils.copyProperties(question,questionDTO);
             questionDTO.setUser(user);
@@ -92,8 +98,8 @@ public class QuestionService {
     }
 
     public QuestionDTO getById(Integer id) {
-       Question question= questionMapper.getById(id);
-       User user=userMapper.findById(question.getCreator());
+       Question question= questionMapper.selectByPrimaryKey(id);
+       User user=userMapper.selectByPrimaryKey(question.getCreator());
        QuestionDTO questionDTO=new QuestionDTO();
        questionDTO.setUser(user);
        BeanUtils.copyProperties(question,questionDTO);
@@ -107,8 +113,15 @@ public class QuestionService {
            questionMapper.insert(question);
         }else{
             //更新
-            question.setGmtModified(question.getGmtCreate());
-            questionMapper.update(question);
+           // question.setGmtModified(question.getGmtCreate());
+            Question updateQuestion= new Question();
+            updateQuestion.setGmtModified(question.getGmtCreate());
+            updateQuestion.setTitle(question.getTitle());
+            updateQuestion.setDescription(question.getDescription());
+            updateQuestion.setTag(question.getTag());
+            QuestionExample example=new QuestionExample();
+            example.createCriteria().andIdEqualTo(question.getId());
+            questionMapper.updateByExampleSelective(updateQuestion,example);
         }
 
 
