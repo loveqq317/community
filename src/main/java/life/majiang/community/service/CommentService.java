@@ -5,8 +5,10 @@ import life.majiang.community.enums.CommentTypeEnum;
 import life.majiang.community.exception.CustomizeErrorCode;
 import life.majiang.community.exception.CustomizeException;
 import life.majiang.community.mapper.CommentMapper;
+import life.majiang.community.mapper.QuestionExpMapper;
 import life.majiang.community.mapper.QuestionMapper;
 import life.majiang.community.model.Comment;
+import life.majiang.community.model.Question;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +25,13 @@ public class CommentService {
     private CommentMapper commentMapper;
     @Autowired
     private QuestionMapper questionMapper;
+    @Autowired
+    private QuestionExpMapper questionExpMapper;
     public void insert(Comment comment){
         if (comment.getParentId() == null || comment.getParentId() == 0){
             throw new CustomizeException(CustomizeErrorCode.TARGET_PARM_NOT_FOUND);
         }
-        if (comment.getType() != null || !CommentTypeEnum.isExist(comment.getType())){
+        if (comment.getType() != null && !CommentTypeEnum.isExist(comment.getType())){
             throw  new CustomizeException((CustomizeErrorCode.TYPE_PARM_WRONG));
         }
         if (comment.getType() ==CommentTypeEnum.COMMENT.getType() ){
@@ -40,7 +44,13 @@ public class CommentService {
             }
         }else{
             //回复问题
-
+            Question question=questionMapper.selectByPrimaryKey(comment.getParentId());
+            if (question == null ){
+                throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
+            }
+            commentMapper.insert(comment);
+            question.setCommentCount(1);
+            questionExpMapper.incCommentCount(question);
         }
     }
 }

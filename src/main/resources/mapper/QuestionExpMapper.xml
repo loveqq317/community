@@ -18,5 +18,11 @@
     VIEW_COUNT = VIEW_COUNT+ #{record.viewCount,jdbcType=INTEGER}
     where ID =#{record.id}
   </update>
+  <update id="incCommentCount" parameterType="life.majiang.community.model.Question">
+    update QUESTION
+    set
+    COMMENT_COUNT = COMMENT_COUNT+ #{record.commentCount,jdbcType=INTEGER}
+    where ID =#{record.id}
+  </update>
 
 </mapper>
