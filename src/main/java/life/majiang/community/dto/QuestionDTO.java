@@ -3,6 +3,8 @@ package life.majiang.community.dto;
 import life.majiang.community.model.User;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @ClassName QuestionDTO
  * @Description TODO

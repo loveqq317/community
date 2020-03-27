@@ -8,6 +8,7 @@ a {
     cursor: pointer;
     color: #155faa;
 }
+
 .main{
     max-width: 1300px !important;
     background-color:#ffffff;
@@ -19,6 +20,9 @@ a {
 .media-object{
     width:40px;
     height: 40px;
+}
+.media-body{
+    vertical-align: middle;
 }
 .comment-text{
     font-size: 12px;
@@ -37,4 +41,25 @@ a {
 .text-999-12{
     color:#999999;
     font-size: 12px;
+}
+.comment-form,.comment-form button{
+    margin:10px 0px;
+}
+.comments {
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+.menu{
+    color: #999;
+    margin-top: 5px;
+}
+.menu .icon {
+    margin-right: 6px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.menu .icon:hover {
+    color:#499ef3;
 }
