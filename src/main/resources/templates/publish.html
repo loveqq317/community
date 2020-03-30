@@ -8,7 +8,26 @@
     <link rel="stylesheet" href="/css/community.css">
     <script src="/js/jquery-3.4.1.min.js"></script>
     <script src="/js/bootstrap.js" type="application/javascript"></script>
+<script type="application/javascript">
+    function setTags(e){
+        var newTag=$(e).html();
+        var tagValue=$("#tag").val();
+        var array=tagValue.split(",");
+        if (tagValue ){
+            if ($.inArray(newTag, array)==-1){
 
+                $("#tag").val(tagValue+","+newTag);
+            }
+        }else{
+            $("#tag").val(newTag);
+
+        }
+    }
+    function showSelectTagDiv() {
+        $("#selectTag").show();
+    }
+
+</script>
 </head>
 <body>
 <div th:insert="~{navigation :: copy}"></div>
@@ -27,10 +46,43 @@
                     <label for="description">问题补充（必填，请参照右侧提示）</label>
                     <textarea th:text="${description}" class="form-control" rows="10" cols="30" id="description" name="description"></textarea>
                 </div>
+
                 <div class="form-group">
                     <label for="tag">添加标签</label>
-                    <input th:value="${tag}" type="text" class="form-control" id="tag" name="tag" placeholder="输入标签，逗号隔开">
+                    <input th:value="${tag}" type="text" class="form-control" id="tag" name="tag" placeholder="输入标签,逗号隔开"
+                           onfocus="showSelectTagDiv()" >
+
                 </div>
+                <div id="selectTag" style="display: none;">
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">开发语言</a></li>
+                        <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">平台框架</a></li>
+                        <li role="presentation"><a href="#messages" aria-controls="messages" role="tab" data-toggle="tab">服务器</a></li>
+                        <li role="presentation"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">数据库</a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home" style="padding-top: 10px;">
+                            <span class="label label-info tagLabel"  onclick="setTags(this)">Java</span>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="profile" style="padding-top: 10px;">
+                            <span class="label label-info tagLabel"  onclick="setTags(this)">spring</span>
+                            <span class="label label-info tagLabel"  onclick="setTags(this)">springboot</span>
+
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="messages" style="padding-top: 10px;">
+                            <span class="label label-info tagLabel"  onclick="setTags(this)">Windows</span>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="settings" style="padding-top: 10px;">
+                            <span class="label label-info tagLabel"  onclick="setTags(this)">Mysql</span>
+                        </div>
+                    </div>
+
+                </div>
+
                 <div class="form-group">
                     <div th:if="${error != null} " class="alert alert-danger" role="alert" th:text="${error}" style="width:100%;"></div>
                 </div>

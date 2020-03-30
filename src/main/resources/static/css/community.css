@@ -78,3 +78,8 @@ a {
 .relatedUl{
     list-style: none;
 }
+.tagLabel{
+    margin-right: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+}
