@@ -63,3 +63,15 @@ a {
 .menu .icon:hover {
     color:#499ef3;
 }
+.menu .active {
+    color:#499ef3;
+}
+.secondComments{
+    border: 1px solid #eee;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 15px 0px;
+}
+.secondComments .btn{
+    margin-top:15px;
+}

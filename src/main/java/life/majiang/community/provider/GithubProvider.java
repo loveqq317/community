@@ -52,10 +52,10 @@ public class GithubProvider {
         OkHttpClient client = new OkHttpClient();
 
         Request request = new Request.Builder()
-                .url("https://api.github.com/user?access_token="+assessToken)
-                .build();
-//                  .url("https://api.github.com/user")
-//                .header("Authorization","token"+assessToken).build();
+              //  .url("https://api.github.com/user?access_token="+assessToken)
+              //  .build();
+                 .url("https://api.github.com/user")
+               .header("Authorization","token"+assessToken).build();
 
         try (Response response = client.newCall(request).execute()) {
             String responseString = response.body().string();

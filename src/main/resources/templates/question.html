@@ -10,38 +10,87 @@
     <script src="/js/bootstrap.js" type="application/javascript"></script>
 
     <script type="application/javascript">
-        (function ($) {
-            $.fn.serializeJson = function () {
-                var serializeObj = {};
-                var array = this.serializeArray();
-                var str = this.serialize();
-                $(array).each(function () {
-                    if (serializeObj[this.name]) {
-                        if ($.isArray(serializeObj[this.name])) {
-                            serializeObj[this.name].push(this.value);
-                        } else {
-                            serializeObj[this.name] = [serializeObj[this.name], this.value];
-                        }
-                    } else {
-                        serializeObj[this.name] = this.value;
-                    }
-                });
-                return serializeObj;
-            };
-        })(jQuery);
+        function getMyDate(str){
+            var oDate = new Date(str),
+                oYear = oDate.getFullYear(),
+                oMonth = oDate.getMonth()+1,
+                oDay = oDate.getDate(),
+                oHour = oDate.getHours(),
+                oMin = oDate.getMinutes(),
+                oSen = oDate.getSeconds(),
+                oTime = oYear +'-'+ getzf(oMonth) +'-'+ getzf(oDay) +' '+ getzf(oHour) +':'+
+                    getzf(oMin) +':'+getzf(oSen);//最后拼接时间
+            return oTime;
+        };
+        //补0操作
+        function getzf(num){
+            if(parseInt(num) < 10){
+                num = '0'+num;
+            }
+            return num;
+        }
 
-        //提交评论
+        //提交问题评论
         function commitComment() {
             if (!$("#commentContent").val()){
                 alert("评论内容不能为空");
                 return;
             }
-            var data = JSON.stringify($("#commentForm").serializeJson());
-            console.log(data);
+            var questionId=$("#questionId").val();
+            var content=$("#commentContent").val();
+            commentByParentId(questionId,1,content);
+        }
+
+        /**
+         * 展开二级评论
+         */
+        function collapseComments(e) {
+            var dataId=e.getAttribute("data-id");
+            var commentObj=$("#comment-"+dataId);
+            commentObj.toggleClass("in");
+            e.classList.toggle("active");
+            //var collapse=e.getAttribute("data-collapse");
+            //console.log(collapse);
+            console.log(commentObj.hasClass("in"));
+            if (commentObj.hasClass("in")){
+                var commentBody=$("#commentbody-"+dataId).empty();
+
+                $.getJSON("/comment/"+dataId,function(result){
+                    console.log(result);
+                    var data=result.data;
+                    $.each(data, function(index,item){
+                        var rowElement=$("#template").clone().attr('id','template-'+item.id);
+                        rowElement.find("#template-imgHead").attr('src',item.user.avatarUrl).attr('id','imgHead-'+item.id);
+                        rowElement.find("#template-userName").text(item.user.name).attr('id','userName-'+item.id);
+                        rowElement.find("#template-contentText").text(item.content).attr('id','contentText-'+item.id);
+                        rowElement.find("#template-gmtCreate").text(getMyDate(item.gmtCreate)).attr('id','gmtCreate-'+item.id);
+                        rowElement.find("#template-commentCount").text(item.comentCount).attr('id','commentCount-'+item.id);
+                        rowElement.appendTo(commentBody);
+                    })
+                })
+            }
+
+        }
+        //提交二级评论
+        function commitSubComment(e){
+            var commentId=e.getAttribute("data-id");
+            var content=$("#input-"+commentId).val();
+            debugger;
+            if (!content){
+                alert("评论内容不能为空");
+                return;
+            }
+            commentByParentId(commentId,2,content);
+        }
+        function commentByParentId(parentId,type,content){
             $.ajax({
                 type: "POST",
                 url: "/comment",
-                data: data,
+                data: JSON.stringify({
+                    "parentId":parentId,
+                    "content":content,
+                    "type":type
+                }),
                 success: function (result) {
                     if (result.code == 200) {
                         //清空表单，隐藏表单，查询评论列表
@@ -67,7 +116,6 @@
                 contentType: 'application/json'
             });
         }
-
     </script>
 
 </head>
@@ -82,14 +130,18 @@
                     | 发布时间：<span th:text="${#dates.format(question.gmtCreate, 'yyyy-MM-dd')}">2019年12月06日 </span>
                     | 阅读数：<span th:text="${question.viewCount}">8617</span></div>
             </div>
-            <div class="col-lg-12 col-md-12 col-sm-12">
-                <hr>
-            </div>
+            <hr class="col-lg-12 col-md-12 col-sm-12">
             <div class="col-lg-12 col-md-12 col-sm-12" th:text="${question.description}">
             </div>
-            <div class="col-lg-12 col-md-12 col-sm-12">
-                <hr>
+            <hr class="col-lg-12 col-md-12 col-sm-12">
+            <!--标签-->
+            <div class="col-lg-12 col-md-12 col-sm-12"  >
+                     <span th:text="${tag}" th:each="tag:${question.tag.split(',')}"  class="label label-info" style="margin-right: 10px;">
+
+                    </span>
             </div>
+            <hr class="col-lg-12 col-md-12 col-sm-12">
+            <!--编辑-->
             <div class="col-lg-12 col-md-12 col-sm-12">
                 <a th:href="@{'/publish/'+${question.id}}"
                    th:if="${session.user != null && session.user.id == question.creator}">
@@ -114,11 +166,49 @@
                         <p><span class="comment-text" th:text="${comment.content}"> 我是回复内容</span></p>
                         <div class="menu">
                             <span class="glyphicon glyphicon-thumbs-up icon"></span>
-                            <span data-id="2659" onclick="collapseComments(this)" class="icon">
+                            <span th:data-id="${comment.id}" onclick="collapseComments(this)" class="icon" >
                                     <span class="glyphicon glyphicon-comment"></span>
-                                    <span>0</span>
-                                </span>
+                                    <span th:text="${comment.commentCount}">0</span>
+                            </span>
                             <span class="pull-right" th:text="${#dates.format(comment.gmtCreate, 'yyyy-MM-dd')}"></span>
+                            <!-- 二级评论  start -->
+
+                            <div class="col-lg-12 col-md-12 col-sm-12 collapse  secondComments" th:id="${'comment-'+comment.id}">
+                                <div th:id="${'commentbody-'+comment.id}">
+
+                                </div>
+                             <div style="display:none;">
+                                 <!--  模板---------- -->
+                                <div class="media  comments" id="template" >
+                                      <div class="media-left">
+                                          <a href="#">
+                                              <img id="template-imgHead" class="media-object img-rounded"  alt="图片">
+                                          </a>
+                                      </div>
+                                      <div class="media-body">
+                                          <h4 class="media-heading titleH4" style="font-weight: normal;" id="template-userName">name</h4>
+                                          <p><span class="comment-text" id="template-contentText"> 我是回复内容</span></p>
+                                          <div class="menu">
+                                             <!-- <span class="glyphicon glyphicon-thumbs-up icon"></span>
+                                              <span class="icon" >
+                                                  <span class="glyphicon glyphicon-comment"></span>
+                                                  <span id="template-commentCount">0</span>
+                                              </span>-->
+                                              <span class="pull-right" id="template-gmtCreate">2019-10-10</span>
+
+                                          </div>
+                                      </div>
+
+                                  </div>
+                                 <!--  模板---------- -->
+                             </div>
+
+
+
+                                    <textarea th:id="${'input-'+comment.id}"   class="form-control" rows="3" placeholder="评论一下......"></textarea>
+                                    <button type="button"  class="btn btn-success pull-right" th:data-id="${comment.id}"  onclick="commitSubComment(this)">评论</button>
+                            </div>
+                            <!-- 二级评论   end -->
                         </div>
                     </div>
 
@@ -142,9 +232,9 @@
                 </div>
 
                 <form class="comment-form" id="commentForm">
-                    <input type="hidden" name="parentId" th:value="${question.id}"/>
-                    <input type="hidden" name="type" value="1"/>
-                    <textarea id="commentContent" name="content" class="form-control" rows="6"></textarea>
+                    <input type="hidden" id="questionId" th:value="${question.id}"/>
+                    <input type="hidden" id="type" value="1"/>
+                    <textarea id="commentContent"  class="form-control" rows="6"></textarea>
                     <button type="button" class="btn btn-success btn-publish" onclick="commitComment()">回复</button>
                 </form>
             </div>

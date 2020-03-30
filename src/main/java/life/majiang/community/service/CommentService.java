@@ -5,16 +5,14 @@ import life.majiang.community.dto.CommentDTO;
 import life.majiang.community.enums.CommentTypeEnum;
 import life.majiang.community.exception.CustomizeErrorCode;
 import life.majiang.community.exception.CustomizeException;
-import life.majiang.community.mapper.CommentMapper;
-import life.majiang.community.mapper.QuestionExpMapper;
-import life.majiang.community.mapper.QuestionMapper;
-import life.majiang.community.mapper.UserMapper;
+import life.majiang.community.mapper.*;
 import life.majiang.community.model.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.peer.CanvasPeer;
 import java.beans.Transient;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,6 +33,8 @@ public class CommentService {
     @Autowired
     private QuestionExpMapper questionExpMapper;
     @Autowired
+    private CommentExpMapper commentExpMapper;
+    @Autowired
     private UserMapper userMapper;
     @Transactional
     public void insert(Comment comment){
@@ -51,6 +51,10 @@ public class CommentService {
                 throw new CustomizeException(CustomizeErrorCode.COMMENT_NOT_EXIST);
             }else{
                 commentMapper.insert(comment);
+                Comment parentComment=commentMapper.selectByPrimaryKey(comment.getParentId());
+                parentComment.setCommentCount(1L);
+                commentExpMapper.incCommentCount(parentComment);
+
             }
         }else{
             //回复问题
