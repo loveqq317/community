@@ -6,6 +6,7 @@ import life.majiang.community.exception.CustomizeErrorCode;
 import life.majiang.community.model.Comment;
 import life.majiang.community.model.User;
 import life.majiang.community.service.CommentService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,7 +35,7 @@ public class CommentController {
         if (user == null ){
             return ResultDTO.errorOf(CustomizeErrorCode.NO_LOGIN);
         }
-        if (commentDTO == null || commentDTO.getContent() == null || commentDTO.getContent().trim().equals("")){
+        if (commentDTO == null || StringUtils.isBlank(commentDTO.getContent())){
             return ResultDTO.errorOf(CustomizeErrorCode.CONTENT_IS_EMPTY);
         }
         Comment coment= new Comment();

@@ -110,7 +110,7 @@
                         </a>
                     </div>
                     <div class="media-body">
-                        <h4 class="media-heading titleH4" th:text="${comment.user.name}"></h4>
+                        <h4 class="media-heading titleH4" style="font-weight: normal;" th:text="${comment.user.name}"></h4>
                         <p><span class="comment-text" th:text="${comment.content}"> 我是回复内容</span></p>
                         <div class="menu">
                             <span class="glyphicon glyphicon-thumbs-up icon"></span>
@@ -118,7 +118,7 @@
                                     <span class="glyphicon glyphicon-comment"></span>
                                     <span>0</span>
                                 </span>
-                            <span class="pull-right" th:text="${#dates.format(question.gmtCreate, 'yyyy-MM-dd')}"></span>
+                            <span class="pull-right" th:text="${#dates.format(comment.gmtCreate, 'yyyy-MM-dd')}"></span>
                         </div>
                     </div>
 
