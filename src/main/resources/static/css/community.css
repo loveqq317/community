@@ -75,3 +75,6 @@ a {
 .secondComments .btn{
     margin-top:15px;
 }
+.relatedUl{
+    list-style: none;
+}

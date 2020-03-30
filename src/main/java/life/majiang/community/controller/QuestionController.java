@@ -4,6 +4,7 @@ import life.majiang.community.dto.CommentDTO;
 import life.majiang.community.dto.QuestionDTO;
 import life.majiang.community.enums.CommentTypeEnum;
 import life.majiang.community.mapper.QuestionMapper;
+import life.majiang.community.model.Question;
 import life.majiang.community.service.CommentService;
 import life.majiang.community.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +34,11 @@ public class QuestionController {
         questionService.incView(id);//累加阅读数
         QuestionDTO questionDTO=questionService.getById(id);
         List<CommentDTO> commments=commentService.listByParentId(id, CommentTypeEnum.QUESTION.getType());
+        List<Question> questionRalatedList=questionService.selectRelated(questionDTO);
         model.addAttribute("question",questionDTO);
         model.addAttribute("comments",commments);
+        model.addAttribute("relatedQuestions",questionRalatedList);
         return "question";
     }
+
 }

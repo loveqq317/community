@@ -10,6 +10,7 @@ import life.majiang.community.mapper.QuestionExpMapper;
 import life.majiang.community.mapper.QuestionMapper;
 import life.majiang.community.mapper.UserMapper;
 import life.majiang.community.model.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,5 +151,17 @@ public class QuestionService {
         record.setViewCount(1);
         record.setId(id);
         questionExpMapper.incView(record);
+    }
+
+    public List<Question> selectRelated(QuestionDTO questionDTO) {
+        if (StringUtils.isBlank(questionDTO.getTag())){
+            return new ArrayList<>();
+        }
+        Question question=new Question();
+        String tags=questionDTO.getTag().replace(",","|");
+        question.setId(questionDTO.getId());
+        question.setTag(tags);
+
+        return questionExpMapper.selectRelated(question);
     }
 }
